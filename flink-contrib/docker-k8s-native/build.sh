@@ -27,7 +27,7 @@ Usage:
   build.sh --help
 
   If the --image-name flag is not used the built image name will be 'flink'.
-  If the --for-dev flag was set then build docker image and assume flink distribution folder will be mounted to /opt. 
+  If the --for-dev flag was set then build docker image and assume flink distribution folder will be mounted to /opt.
 HERE
   exit 1
 }
