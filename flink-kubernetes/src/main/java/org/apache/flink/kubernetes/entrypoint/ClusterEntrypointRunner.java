@@ -40,7 +40,7 @@ public abstract class ClusterEntrypointRunner implements ParserResultFactory<Fli
 
 	public void run(String[] args) {
 
-		Class clazz = (Class) ((ParameterizedType) this.getClass().getGenericSuperclass()).getActualTypeArguments()[0];
+		Class clazz = this.getClass();
 
 		// startup checks and logging
 		EnvironmentInformation.logEnvironmentInfo(LOG, clazz.getSimpleName(), args);
@@ -57,7 +57,7 @@ public abstract class ClusterEntrypointRunner implements ParserResultFactory<Fli
 			ClusterEntrypoint.runClusterEntrypoint(entrypoint);
 
 		} catch (FlinkParseException e) {
-			LOG.error("Could not parse command line arguments {}.", args, e);
+			LOG.error("Could not parse command line arguments: {}.", args, e.getCause().getMessage());
 			commandLineParser.printHelp(clazz.getSimpleName());
 			System.exit(1);
 		}

@@ -38,6 +38,8 @@ import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.Watcher;
+import org.apache.flink.kubernetes.kubeclient.fabric8.decorators.debug.JobManagerDebugDecorator;
+import org.apache.flink.kubernetes.kubeclient.fabric8.decorators.debug.TaskManagerDebugDecorator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -168,6 +170,11 @@ public class Fabric8FlinkKubeClient implements KubeClient {
 			int uiPort = this.flinkKubeOptions.getServicePort(RestOptions.PORT);
 			return new Endpoint(address, uiPort);
 		});
+	}
+
+	@Override
+	public List<String> listFlinkClusters() {
+		return null;
 	}
 
 	@Override
