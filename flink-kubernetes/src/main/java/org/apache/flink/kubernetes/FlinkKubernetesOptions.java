@@ -22,6 +22,8 @@ import org.apache.flink.configuration.ConfigOption;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.util.Preconditions;
 
+import org.apache.commons.cli.Option;
+
 import static org.apache.flink.configuration.ConfigOptions.key;
 
 /**
@@ -39,6 +41,22 @@ public class FlinkKubernetesOptions {
 			.defaultValue("")
 			.withDescription("The external ip for job manager external IP.");
 
+	public static final Option IMAGE_OPTION = Option.builder("i")
+		.longOpt("image")
+		.required(true)
+		.hasArg(true)
+		.argName("imagename")
+		.desc("the docker image name.")
+		.build();
+
+	public static final Option CLUSTERID_OPTION = Option.builder("cid")
+		.longOpt("clusterid")
+		.required(true)
+		.hasArg(true)
+		.argName("clusterid")
+		.desc("the cluster id that will be used in namespace")
+		.build();
+
 	private Configuration configuration;
 
 	private String clusterId;
@@ -49,10 +67,20 @@ public class FlinkKubernetesOptions {
 
 	private String kubeConfigFileName = null;
 
+	private String serviceUUID;
+
 	public FlinkKubernetesOptions(Configuration configuration, String clusterId) {
 		Preconditions.checkArgument(configuration != null);
 		this.configuration = configuration;
 		this.clusterId = clusterId;
+	}
+
+	public String getServiceUUID() {
+		return serviceUUID;
+	}
+
+	public void setServiceUUID(String serviceUUID) {
+		this.serviceUUID = serviceUUID;
 	}
 
 	public String getClusterId() {
@@ -65,6 +93,10 @@ public class FlinkKubernetesOptions {
 
 	public String getImageName(){
 		return this.imageName;
+	}
+
+	public void setImageName(String imageName) {
+		this.imageName = imageName;
 	}
 
 	public String getNamespace() {
@@ -97,5 +129,36 @@ public class FlinkKubernetesOptions {
 
 	public void setKubeConfigFileName(String kubeConfigFileName) {
 		this.kubeConfigFileName = kubeConfigFileName;
+	}
+
+	/**
+	 * build FlinkKubernetesOption from commandline.
+	 * */
+	public static FlinkKubernetesOptions fromCommandLine(CommandLine commandLine){
+		final Properties dynamicProperties = commandLine.getOptionProperties(DYNAMIC_PROPERTY_OPTION.getOpt());
+		final String restPortString = commandLine.getOptionValue(REST_PORT_OPTION.getOpt(), "-1");
+		int restPort = Integer.parseInt(restPortString);
+		String hostname = commandLine.getOptionValue(HOST_OPTION.getOpt());
+		final String imageName = commandLine.getOptionValue(IMAGE_OPTION.getOpt());
+		final String clusterId = commandLine.getOptionValue(CLUSTERID_OPTION.getOpt());
+
+		hostname = hostname == null ? clusterId : hostname;
+		Configuration configuration = GlobalConfiguration
+			.loadConfigurationWithDynamicProperties(ConfigurationUtils.createConfiguration(dynamicProperties));
+
+		if (hostname != null) {
+			configuration.setString(RestOptions.ADDRESS, hostname);
+		}
+
+		if (restPort == -1) {
+			restPort = RestOptions.PORT.defaultValue();
+		}
+
+		configuration.setInteger(RestOptions.PORT, restPort);
+
+		FlinkKubernetesOptions options = new FlinkKubernetesOptions(configuration, clusterId);
+		options.setImageName(imageName);
+
+		return options;
 	}
 }
