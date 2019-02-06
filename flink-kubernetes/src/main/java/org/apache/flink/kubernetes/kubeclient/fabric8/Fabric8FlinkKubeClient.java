@@ -18,7 +18,6 @@
 
 package org.apache.flink.kubernetes.kubeclient.fabric8;
 
-
 import org.apache.flink.configuration.RestOptions;
 import org.apache.flink.kubernetes.FlinkKubernetesOptions;
 import org.apache.flink.kubernetes.kubeclient.Endpoint;
@@ -39,7 +38,6 @@ import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.Watcher;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -85,11 +83,11 @@ public class Fabric8FlinkKubeClient implements KubeClient {
 		this.taskManagerPodDecorators.add(new PodInitializerDecorator());
 		this.taskManagerPodDecorators.add(new OwnerReferenceDecorator());
 
-		if(this.flinkKubeOptions.getIsDebugMode()){
+		if (this.flinkKubeOptions.getIsDebugMode()) {
 			this.serviceDecorators.add(new ExternalIPDecorator());
 			this.clusterPodDecorators.add(new PodDebugDecorator());
 			this.taskManagerPodDecorators.add(new PodDebugDecorator());
-		}else{
+		} else {
 			this.serviceDecorators.add(new LoadBalancerDecorator());
 		}
 	}
@@ -129,7 +127,8 @@ public class Fabric8FlinkKubeClient implements KubeClient {
 	 * Extract service address.
 	 * */
 	private String extractServiceAddress(Service service) {
-		if(this.flinkKubeOptions.getIsDebugMode() && this.flinkKubeOptions.getExternalIP() != null){
+		if (this.flinkKubeOptions.getIsDebugMode()
+			&& this.flinkKubeOptions.getExternalIP() != null) {
 			//TODO preconditions check
 			return this.flinkKubeOptions.getExternalIP();
 		}

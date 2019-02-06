@@ -177,7 +177,7 @@ public class FlinkKubernetesOptions {
 		Configuration configuration = GlobalConfiguration
 			.loadConfigurationWithDynamicProperties(ConfigurationUtils.createConfiguration(dynamicProperties));
 
-		if(hostname != null){
+		if (hostname != null) {
 			configuration.setString(RestOptions.ADDRESS, hostname);
 		}
 

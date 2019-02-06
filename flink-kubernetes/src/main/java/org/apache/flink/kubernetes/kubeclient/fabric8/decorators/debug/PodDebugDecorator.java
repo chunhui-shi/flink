@@ -18,6 +18,11 @@
 
 package org.apache.flink.kubernetes.kubeclient.fabric8.decorators.debug;
 
+import org.apache.flink.kubernetes.FlinkKubernetesOptions;
+import org.apache.flink.kubernetes.kubeclient.fabric8.FlinkPod;
+import org.apache.flink.kubernetes.kubeclient.fabric8.decorators.Decorator;
+import org.apache.flink.util.Preconditions;
+
 import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.EnvVar;
 import io.fabric8.kubernetes.api.model.EnvVarBuilder;
@@ -28,15 +33,13 @@ import io.fabric8.kubernetes.api.model.Volume;
 import io.fabric8.kubernetes.api.model.VolumeBuilder;
 import io.fabric8.kubernetes.api.model.VolumeMount;
 import io.fabric8.kubernetes.api.model.VolumeMountBuilder;
-import org.apache.flink.kubernetes.FlinkKubernetesOptions;
-import org.apache.flink.kubernetes.kubeclient.fabric8.FlinkPod;
-import org.apache.flink.kubernetes.kubeclient.fabric8.decorators.Decorator;
-import org.apache.flink.runtime.util.EnvironmentInformation;
-import org.apache.flink.util.Preconditions;
 
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * A decorator to add debug option.
+ */
 public class PodDebugDecorator extends Decorator<Pod, FlinkPod> {
 
 	public static final String FLINK_DIST_VOLUME_NAME = "flink-dist-volume";
@@ -75,7 +78,7 @@ public class PodDebugDecorator extends Decorator<Pod, FlinkPod> {
 		volumes.add(flinkDistVolume);
 		volumes.add(flinkProjectVolume);
 
-		if(container.getVolumeMounts() == null){
+		if (container.getVolumeMounts() == null) {
 			container.setVolumeMounts(new ArrayList<>());
 		}
 
@@ -90,7 +93,7 @@ public class PodDebugDecorator extends Decorator<Pod, FlinkPod> {
 			.withMountPath("/flink_root")
 			.build());
 
-		if(container.getEnv() == null){
+		if (container.getEnv() == null) {
 			container.setEnv(new ArrayList<>());
 		}
 

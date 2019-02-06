@@ -18,24 +18,15 @@
 
 package org.apache.flink.kubernetes.kubeclient.fabric8.decorators;
 
-import io.fabric8.kubernetes.api.model.ObjectMeta;
-import io.fabric8.kubernetes.api.model.OwnerReference;
-import io.fabric8.kubernetes.api.model.OwnerReferenceBuilder;
-import org.apache.flink.configuration.JobManagerOptions;
-import org.apache.flink.configuration.RestOptions;
 import org.apache.flink.kubernetes.FlinkKubernetesOptions;
 import org.apache.flink.kubernetes.kubeclient.fabric8.FlinkPod;
 import org.apache.flink.util.Preconditions;
 
-import io.fabric8.kubernetes.api.model.Container;
-import io.fabric8.kubernetes.api.model.ContainerBuilder;
-import io.fabric8.kubernetes.api.model.ContainerPortBuilder;
+import io.fabric8.kubernetes.api.model.ObjectMeta;
+import io.fabric8.kubernetes.api.model.OwnerReferenceBuilder;
 import io.fabric8.kubernetes.api.model.Pod;
-import io.fabric8.kubernetes.api.model.PodSpecBuilder;
 
 import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
 
 /**
  * for GC.
@@ -47,7 +38,7 @@ public class OwnerReferenceDecorator extends Decorator<Pod, FlinkPod> {
 
 		Preconditions.checkNotNull(flinkKubernetesOptions.getServiceUUID());
 
-		if(resource.getMetadata() == null){
+		if (resource.getMetadata() == null) {
 			resource.setMetadata(new ObjectMeta());
 		}
 
