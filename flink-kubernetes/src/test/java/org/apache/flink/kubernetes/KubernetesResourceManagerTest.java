@@ -142,6 +142,7 @@ public class KubernetesResourceManagerTest {
 		Configuration configuration = new Configuration();
 		FlinkKubernetesOptions options = new FlinkKubernetesOptions(configuration, "abc");
 		options.setNamespace("test");
+		options.setServiceUUID(UUID.randomUUID().toString());
 		KubernetesResourceManager resourceManager = this.createResourceManager(options);
 		ResourceProfile profile = new ResourceProfile(1.1, 2);
 		resourceManager.start();

@@ -19,32 +19,39 @@
 package org.apache.flink.kubernetes.kubeclient.fabric8.decorators;
 
 import org.apache.flink.kubernetes.FlinkKubernetesOptions;
-import org.apache.flink.kubernetes.kubeclient.fabric8.FlinkService;
+import org.apache.flink.kubernetes.kubeclient.fabric8.FlinkPod;
 import org.apache.flink.util.Preconditions;
 
-import io.fabric8.kubernetes.api.model.Service;
-import io.fabric8.kubernetes.api.model.ServiceSpec;
+import io.fabric8.kubernetes.api.model.ObjectMeta;
+import io.fabric8.kubernetes.api.model.OwnerReferenceBuilder;
+import io.fabric8.kubernetes.api.model.Pod;
 
 import java.util.Arrays;
 
 /**
- * This decorator is for debug purpose.
+ * for GC.
  * */
-public class ExternalIPDecorator extends Decorator<Service, FlinkService> {
-
-	protected Boolean isEnabled(FlinkKubernetesOptions flinkKubernetesOptions) {
-		return flinkKubernetesOptions.getIsDebugMode();
-	}
+public class OwnerReferenceDecorator extends Decorator<Pod, FlinkPod> {
 
 	@Override
-	protected Service doDecorate(Service resource, FlinkKubernetesOptions flinkKubernetesOptions) {
+	protected Pod doDecorate(Pod resource, FlinkKubernetesOptions flinkKubernetesOptions) {
 
-		String externalIP = flinkKubernetesOptions.getExternalIP();
-		Preconditions.checkState(externalIP != null);
+		Preconditions.checkNotNull(flinkKubernetesOptions.getServiceUUID());
 
-		ServiceSpec spec = resource.getSpec() != null ? resource.getSpec() : new ServiceSpec();
-		spec.setExternalIPs(Arrays.asList(externalIP));
-		resource.setSpec(spec);
+		if (resource.getMetadata() == null) {
+			resource.setMetadata(new ObjectMeta());
+		}
+
+		resource.getMetadata().setOwnerReferences(Arrays.asList(
+			new OwnerReferenceBuilder()
+			.withName(flinkKubernetesOptions.getClusterId())
+			.withController(true)
+			.withBlockOwnerDeletion(true)
+			.withKind("service")
+			.withApiVersion(resource.getApiVersion())
+			.withUid(flinkKubernetesOptions.getServiceUUID())
+			.build()
+		));
 
 		return resource;
 	}
