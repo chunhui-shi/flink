@@ -20,7 +20,6 @@ package org.apache.flink.kubernetes.kubeclient.fabric8.decorators;
 
 import org.apache.flink.kubernetes.FlinkKubernetesOptions;
 import org.apache.flink.kubernetes.kubeclient.fabric8.FlinkPod;
-import org.apache.flink.util.Preconditions;
 
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.OwnerReferenceBuilder;
