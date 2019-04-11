@@ -163,7 +163,9 @@ public class Fabric8FlinkKubeClient implements KubeClient {
 			Service createdService = watcher.await(1, TimeUnit.MINUTES);
 			String address = extractServiceAddress(createdService);
 			String uuid = createdService.getMetadata().getUid();
-			flinkKubeOptions.setServiceUUID(uuid);
+			if (uuid != null) {
+				flinkKubeOptions.setServiceUUID(uuid);
+			}
 
 			int uiPort = this.flinkKubeOptions.getServicePort(RestOptions.PORT);
 			return new Endpoint(address, uiPort);

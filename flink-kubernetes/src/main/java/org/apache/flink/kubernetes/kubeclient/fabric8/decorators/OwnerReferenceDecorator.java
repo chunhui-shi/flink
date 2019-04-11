@@ -27,6 +27,7 @@ import io.fabric8.kubernetes.api.model.OwnerReferenceBuilder;
 import io.fabric8.kubernetes.api.model.Pod;
 
 import java.util.Arrays;
+import java.util.UUID;
 
 /**
  * for GC.
@@ -36,7 +37,9 @@ public class OwnerReferenceDecorator extends Decorator<Pod, FlinkPod> {
 	@Override
 	protected Pod doDecorate(Pod resource, FlinkKubernetesOptions flinkKubernetesOptions) {
 
-		Preconditions.checkNotNull(flinkKubernetesOptions.getServiceUUID());
+		if (flinkKubernetesOptions.getServiceUUID() == null) {
+			flinkKubernetesOptions.setServiceUUID(UUID.randomUUID().toString());
+		}
 
 		if (resource.getMetadata() == null) {
 			resource.setMetadata(new ObjectMeta());

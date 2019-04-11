@@ -41,6 +41,7 @@ import org.junit.Test;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -55,6 +56,9 @@ public class Fabric8ClientTest {
 		KubernetesClient client = server.getClient();
 		//only support namespace test
 		options.setNamespace("test");
+		if (options.getServiceUUID() == null) {
+			options.setServiceUUID(UUID.randomUUID().toString());
+		}
 		Fabric8FlinkKubeClient flinkKubeClient = new Fabric8FlinkKubeClient(options, client);
 		flinkKubeClient.initialize();
 		return flinkKubeClient;
