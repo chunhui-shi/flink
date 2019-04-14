@@ -56,7 +56,7 @@
 		<dependency>
 			<groupId>io.fabric8</groupId>
 			<artifactId>kubernetes-client</artifactId>
-			<version>4.1.0</version>
+			<version>4.2.0</version>
 		</dependency>
 
 		<!-- test dependencies -->
@@ -76,7 +76,7 @@
 		<dependency>
 			<groupId>io.fabric8</groupId>
 			<artifactId>kubernetes-server-mock</artifactId>
-			<version>4.0.0</version>
+			<version>4.2.0</version>
 			<scope>test</scope>
 		</dependency>
 

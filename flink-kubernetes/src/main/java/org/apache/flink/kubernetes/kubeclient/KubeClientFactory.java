@@ -28,6 +28,8 @@ import io.fabric8.kubernetes.client.KubernetesClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+
 /**
  * Factory class to create {@link KubeClient}.
  * */
@@ -49,12 +51,17 @@ public class KubeClientFactory {
 			return new Fabric8FlinkKubeClient(options, kubernetesClient);
 		}
 
-		Config config;
+		Config config = null;
 
 		if (options.getKubeConfigFilePath() != null) {
 			LOG.info("Load kubernetes config from file: {}.", options.getKubeConfigFilePath());
-			config = Config.fromKubeconfig(options.getKubeConfigFilePath());
-		} else {
+			try {
+				config = Config.fromKubeconfig(options.getKubeConfigFilePath());
+			} catch (IOException e) {
+				LOG.error("Load kubernetes config failed.", e);
+			}
+		}
+		if (config == null) {
 			LOG.info("Load default kubernetes config.");
 
 			//null means load from default context

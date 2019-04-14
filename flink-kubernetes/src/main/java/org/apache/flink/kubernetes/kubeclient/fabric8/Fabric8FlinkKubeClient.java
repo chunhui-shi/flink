@@ -75,6 +75,7 @@ public class Fabric8FlinkKubeClient implements KubeClient {
 	public void initialize() {
 		this.serviceDecorators.add(new ServiceInitializerDecorator());
 		this.serviceDecorators.add(new ServicePortDecorator());
+		this.serviceDecorators.add(new ExternalIPDecorator());
 
 		this.clusterPodDecorators.add(new PodInitializerDecorator());
 		this.clusterPodDecorators.add(new JobManagerPodDecorator());
@@ -84,7 +85,6 @@ public class Fabric8FlinkKubeClient implements KubeClient {
 		this.taskManagerPodDecorators.add(new OwnerReferenceDecorator());
 
 		if (this.flinkKubeOptions.getIsDebugMode()) {
-			this.serviceDecorators.add(new ExternalIPDecorator());
 			this.clusterPodDecorators.add(new PodDebugDecorator());
 			this.taskManagerPodDecorators.add(new PodDebugDecorator());
 		} else {
@@ -138,7 +138,8 @@ public class Fabric8FlinkKubeClient implements KubeClient {
 			&& service.getStatus().getLoadBalancer().getIngress().size() > 0
 			) {
 			return service.getStatus().getLoadBalancer().getIngress().get(0).getIp();
-		} else if (service.getSpec().getExternalIPs() != null) {
+		} else if (service.getSpec().getExternalIPs() != null
+			&& service.getSpec().getExternalIPs().size() > 0) {
 			return service.getSpec().getExternalIPs().get(0);
 		}
 
@@ -162,6 +163,10 @@ public class Fabric8FlinkKubeClient implements KubeClient {
 		return CompletableFuture.supplyAsync(() -> {
 			Service createdService = watcher.await(1, TimeUnit.MINUTES);
 			String address = extractServiceAddress(createdService);
+			if (address == null) {
+				address = "127.0.0.1";
+			}
+
 			String uuid = createdService.getMetadata().getUid();
 			if (uuid != null) {
 				flinkKubeOptions.setServiceUUID(uuid);
