@@ -158,7 +158,7 @@ public class KubernetesCustomCli extends AbstractCustomCommandLine<String> {
 			, config.getString(JobManagerOptions.ADDRESS)
 			, config.getInteger(JobManagerOptions.PORT));
 
-		System.out.println("Cluster started, web portal: " + url);
+		System.out.println("Cluster " + clusterClient.getClusterId() + " started, web portal: " + url);
 
 		try {
 			System.out.println("Waiting for Job manager starting");
@@ -176,6 +176,8 @@ public class KubernetesCustomCli extends AbstractCustomCommandLine<String> {
 		//
 		//	Command Line Options
 		//
+		System.out.println("Begin to stop K8s session");
+
 		final CommandLine cmd = parseCommandLineOptions(args, true);
 
 		if (cmd.hasOption(HELP_OPTION.getOpt())) {
@@ -186,10 +188,11 @@ public class KubernetesCustomCli extends AbstractCustomCommandLine<String> {
 		String clusterId = getClusterId(cmd);
 
 		if (clusterId == null) {
+			System.out.println("No cluster id in stop command found. Exit.");
 			return -1;
 		}
 
-		System.out.println("Starting K8s session: " + clusterId);
+		System.out.println("Stopping K8s session: " + clusterId);
 
 		KubernetesClusterDescriptor cluster = (KubernetesClusterDescriptor) this.createClusterDescriptor(cmd);
 		cluster.killCluster(clusterId);
