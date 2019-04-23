@@ -75,7 +75,6 @@ public class Fabric8FlinkKubeClient implements KubeClient {
 	public void initialize() {
 		this.serviceDecorators.add(new ServiceInitializerDecorator());
 		this.serviceDecorators.add(new ServicePortDecorator());
-		this.serviceDecorators.add(new ExternalIPDecorator());
 
 		this.clusterPodDecorators.add(new PodInitializerDecorator());
 		this.clusterPodDecorators.add(new JobManagerPodDecorator());
@@ -85,6 +84,7 @@ public class Fabric8FlinkKubeClient implements KubeClient {
 		this.taskManagerPodDecorators.add(new OwnerReferenceDecorator());
 
 		if (this.flinkKubeOptions.getIsDebugMode()) {
+			this.serviceDecorators.add(new ExternalIPDecorator());
 			this.clusterPodDecorators.add(new PodDebugDecorator());
 			this.taskManagerPodDecorators.add(new PodDebugDecorator());
 		} else {
