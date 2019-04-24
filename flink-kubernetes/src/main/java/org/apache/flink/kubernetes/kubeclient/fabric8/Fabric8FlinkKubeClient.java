@@ -99,6 +99,7 @@ public class Fabric8FlinkKubeClient implements KubeClient {
 		for (Decorator<Pod, FlinkPod> d : this.clusterPodDecorators) {
 			pod = d.decorate(pod);
 		}
+		LOG.info(pod.getInternalResource().getSpec().toString());
 
 		this.internalClient.pods().create(pod.getInternalResource());
 	}
@@ -155,6 +156,8 @@ public class Fabric8FlinkKubeClient implements KubeClient {
 			service = d.decorate(service);
 		}
 
+		LOG.info(service.getInternalResource().getSpec().toString());
+
 		this.internalClient.services().create(service.getInternalResource());
 
 		ActionWatcher<Service> watcher = new ActionWatcher<>(Watcher.Action.ADDED, service.getInternalResource());
@@ -165,6 +168,7 @@ public class Fabric8FlinkKubeClient implements KubeClient {
 			String address = extractServiceAddress(createdService);
 			if (address == null) {
 				address = "127.0.0.1";
+				LOG.warn("extractServiceAddress got null address for createdService: ", createdService);
 			}
 
 			String uuid = createdService.getMetadata().getUid();
