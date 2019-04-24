@@ -1200,11 +1200,7 @@ public class CliFrontend {
 		final String kubeSessionCLI = "org.apache.flink.kubernetes.cli.KubernetesCustomCli";
 		try {
 			customCommandLines.add(
-				loadCustomCommandLine(kubeSessionCLI,
-					configuration,
-					configurationDirectory,
-					"k",
-					"k8s"));
+				loadCustomCommandLine(kubeSessionCLI, configuration));
 		} catch (NoClassDefFoundError | Exception e) {
 			LOG.warn("Could not load CLI class {}.", kubeSessionCLI, e);
 		}
