@@ -167,10 +167,10 @@ public class Fabric8FlinkKubeClient implements KubeClient {
 		return CompletableFuture.supplyAsync(() -> {
 			Service createdService = watcher.await(1, TimeUnit.MINUTES);
 			String address = extractServiceAddress(createdService);
-//			if (address == null) {
-//				address = "127.0.0.1";
-//				LOG.warn("extractServiceAddress got null address for createdService: ", createdService);
-//			}
+			if (address == null) {
+				address = "127.0.0.1";
+				LOG.warn("extractServiceAddress got null address for createdService: ", createdService);
+			}
 
 			String uuid = createdService.getMetadata().getUid();
 			if (uuid != null) {
