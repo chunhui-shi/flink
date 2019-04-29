@@ -18,6 +18,7 @@
 
 package org.apache.flink.kubernetes.kubeclient.fabric8;
 
+import io.fabric8.kubernetes.api.model.LoadBalancerStatus;
 import org.apache.flink.configuration.RestOptions;
 import org.apache.flink.kubernetes.FlinkKubernetesOptions;
 import org.apache.flink.kubernetes.kubeclient.Endpoint;
@@ -166,10 +167,10 @@ public class Fabric8FlinkKubeClient implements KubeClient {
 		return CompletableFuture.supplyAsync(() -> {
 			Service createdService = watcher.await(1, TimeUnit.MINUTES);
 			String address = extractServiceAddress(createdService);
-			if (address == null) {
-				address = "127.0.0.1";
-				LOG.warn("extractServiceAddress got null address for createdService: ", createdService);
-			}
+//			if (address == null) {
+//				address = "127.0.0.1";
+//				LOG.warn("extractServiceAddress got null address for createdService: ", createdService);
+//			}
 
 			String uuid = createdService.getMetadata().getUid();
 			if (uuid != null) {
@@ -199,8 +200,9 @@ public class Fabric8FlinkKubeClient implements KubeClient {
 	@Override
 	public Endpoint getResetEndpoint(String clusterId) {
 		Service service = this.internalClient.services().withName(clusterId).fromServer().get();
-
-		String address = service.getStatus().getLoadBalancer().getIngress().get(0).getIp();
+		LoadBalancerStatus lbStatus = service.getStatus().getLoadBalancer();
+		LOG.info("loadbalancer status: " + lbStatus.toString());
+		String address = lbStatus.getIngress().get(0).getIp();
 		int port = service.getSpec().getPorts().get(0).getPort();
 
 		return new Endpoint(address, port);
