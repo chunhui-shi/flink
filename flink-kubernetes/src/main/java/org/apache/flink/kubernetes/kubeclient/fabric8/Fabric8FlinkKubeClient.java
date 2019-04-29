@@ -18,7 +18,6 @@
 
 package org.apache.flink.kubernetes.kubeclient.fabric8;
 
-import io.fabric8.kubernetes.api.model.LoadBalancerStatus;
 import org.apache.flink.configuration.RestOptions;
 import org.apache.flink.kubernetes.FlinkKubernetesOptions;
 import org.apache.flink.kubernetes.kubeclient.Endpoint;
@@ -35,6 +34,7 @@ import org.apache.flink.kubernetes.kubeclient.fabric8.decorators.TaskManagerDeco
 import org.apache.flink.kubernetes.kubeclient.fabric8.decorators.debug.ExternalIPDecorator;
 import org.apache.flink.kubernetes.kubeclient.fabric8.decorators.debug.PodDebugDecorator;
 
+import io.fabric8.kubernetes.api.model.LoadBalancerStatus;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.Service;
 import io.fabric8.kubernetes.client.KubernetesClient;
