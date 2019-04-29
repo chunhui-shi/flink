@@ -200,8 +200,14 @@ public class Fabric8FlinkKubeClient implements KubeClient {
 	@Override
 	public Endpoint getResetEndpoint(String clusterId) {
 		Service service = this.internalClient.services().withName(clusterId).fromServer().get();
+		if (service == null) {
+			LOG.error("service status is null for internal client: " + this.internalClient.toString());
+			return null;
+		}
+
 		LoadBalancerStatus lbStatus = service.getStatus().getLoadBalancer();
 		LOG.info("loadbalancer status: " + lbStatus.toString());
+
 		String address = lbStatus.getIngress().get(0).getIp();
 		int port = service.getSpec().getPorts().get(0).getPort();
 
