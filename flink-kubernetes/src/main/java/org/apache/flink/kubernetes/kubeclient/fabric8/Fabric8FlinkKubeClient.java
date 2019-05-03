@@ -206,10 +206,7 @@ public class Fabric8FlinkKubeClient implements KubeClient {
 			return null;
 		}
 
-		LoadBalancerStatus lbStatus = service.getStatus().getLoadBalancer();
-		LOG.info("loadbalancer status: " + lbStatus.toString());
-
-		String address = lbStatus.getIngress().get(0).getIp();
+		String address = extractServiceAddress(service);
 		int port = service.getSpec().getPorts().get(0).getPort();
 
 		return new Endpoint(address, port);
