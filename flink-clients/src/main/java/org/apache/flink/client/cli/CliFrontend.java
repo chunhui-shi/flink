@@ -178,7 +178,7 @@ public class CliFrontend {
 	 * @param args Command line arguments for the run action.
 	 */
 	protected void run(String[] args) throws Exception {
-		LOG.info("Running 'run' command.");
+		LOG.info("Running 'run' command with args: " + Arrays.toString(args));
 
 		final Options commandOptions = CliFrontendParser.getRunCommandOptions();
 
@@ -200,7 +200,11 @@ public class CliFrontend {
 
 		final PackagedProgram program;
 		try {
-			LOG.info("Building program from JAR file");
+			LOG.info("Building program from JAR file with programOptions: "
+				+ Arrays.toString(runOptions.getProgramArgs())
+				+ ", jarFile: " + runOptions.getJarFilePath()
+				+ ", entryClass: " + runOptions.getEntryPointClassName()
+			);
 			program = buildProgram(runOptions);
 		}
 		catch (FileNotFoundException e) {
@@ -305,7 +309,10 @@ public class CliFrontend {
 					}
 				}
 			}
-		} finally {
+		} catch (Exception e) {
+			LOG.info("Error happens in CliFrontend.runProgram.", e);
+		}
+		finally {
 			try {
 				clusterDescriptor.close();
 			} catch (Exception e) {
@@ -1120,6 +1127,9 @@ public class CliFrontend {
 			final CliFrontend cli = new CliFrontend(
 				configuration,
 				customCommandLines);
+
+			LOG.info("configurationDirectory: " + configurationDirectory);
+			LOG.info("cli.configuration: " + cli.configuration.toString());
 
 			SecurityUtils.install(new SecurityConfiguration(cli.configuration));
 			int retCode = SecurityUtils.getInstalledContext()

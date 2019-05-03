@@ -69,5 +69,5 @@ public interface KubeClient extends AutoCloseable {
 	/**
 	 * retrieval rest endpoint of the giving flink clusterId.
 	 */
-	Endpoint getResetEndpoint(String flinkClusterId);
+	Endpoint getRestEndpoint(String flinkClusterId);
 }

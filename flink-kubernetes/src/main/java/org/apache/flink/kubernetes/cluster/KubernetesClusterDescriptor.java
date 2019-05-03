@@ -88,7 +88,7 @@ public class KubernetesClusterDescriptor implements ClusterDescriptor<String> {
 	@Override
 	public ClusterClient<String> retrieve(String clusterId) throws ClusterRetrieveException {
 		try {
-			Endpoint clusterEndpoint = this.client.getResetEndpoint(clusterId);
+			Endpoint clusterEndpoint = this.client.getRestEndpoint(clusterId);
 			return this.createClusterEndpoint(clusterEndpoint, clusterId);
 		} catch (Exception e) {
 			this.client.logException(e);

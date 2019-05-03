@@ -198,8 +198,9 @@ public class Fabric8FlinkKubeClient implements KubeClient {
 	}
 
 	@Override
-	public Endpoint getResetEndpoint(String clusterId) {
-		Service service = this.internalClient.services().withName(clusterId).fromServer().get();
+	public Endpoint getRestEndpoint(String clusterId) {
+		String ns = (this.flinkKubeOptions.getNamespace() == null) ? "default" : this.flinkKubeOptions.getNamespace();
+		Service service = this.internalClient.services().inNamespace(ns).withName(clusterId).fromServer().get();
 		if (service == null) {
 			LOG.error("service status is null for internal client: " + this.internalClient.toString());
 			return null;
