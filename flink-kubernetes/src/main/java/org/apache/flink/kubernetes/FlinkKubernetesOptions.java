@@ -173,11 +173,12 @@ public class FlinkKubernetesOptions {
 		final String imageName = commandLine.getOptionValue(IMAGE_OPTION.getOpt());
 		final String clusterId = commandLine.getOptionValue(CLUSTERID_OPTION.getOpt());
 
-		hostname = hostname == null ? clusterId : hostname;
+		//hostname = hostname == null ? clusterId : hostname;
 		Configuration configuration = GlobalConfiguration
 			.loadConfigurationWithDynamicProperties(ConfigurationUtils.createConfiguration(dynamicProperties));
 
 		if (hostname != null) {
+			System.out.print("rest.address is: " + hostname);
 			configuration.setString(RestOptions.ADDRESS, hostname);
 		}
 

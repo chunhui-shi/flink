@@ -170,6 +170,9 @@ public class Fabric8FlinkKubeClient implements KubeClient {
 				address = "127.0.0.1";
 				LOG.warn("extractServiceAddress got null address for createdService: ", createdService);
 			}
+			else {
+				this.flinkKubeOptions.getConfiguration().setString(RestOptions.ADDRESS, address);
+			}
 
 			String uuid = createdService.getMetadata().getUid();
 			if (uuid != null) {
