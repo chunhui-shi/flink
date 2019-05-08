@@ -184,9 +184,8 @@ public class FlinkKubernetesOptions {
 
 		if (restPort == -1) {
 			restPort = RestOptions.PORT.defaultValue();
+			configuration.setInteger(RestOptions.PORT, restPort);
 		}
-
-		configuration.setInteger(RestOptions.PORT, restPort);
 
 		FlinkKubernetesOptions options = new FlinkKubernetesOptions(configuration, clusterId);
 		options.setImageName(imageName);

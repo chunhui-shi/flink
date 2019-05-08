@@ -18,6 +18,7 @@
 
 package org.apache.flink.kubernetes.kubeclient.fabric8;
 
+import org.apache.flink.configuration.ConfigOption;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.configuration.RestOptions;
 import org.apache.flink.kubernetes.FlinkKubernetesOptions;
@@ -41,6 +42,7 @@ import org.junit.Test;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
@@ -106,7 +108,7 @@ public class Fabric8ClientTest {
 		FlinkKubernetesOptions options = new FlinkKubernetesOptions(new Configuration(), "abc");
 		Fabric8FlinkKubeClient flinkKubeClient = this.getClient(options);
 
-		CompletableFuture<Endpoint> future = flinkKubeClient.createClusterService("abc");
+		CompletableFuture<FlinkService> future = flinkKubeClient.createClusterService("abc");
 		KubernetesClient client = server.getClient();
 		ServiceList list = client.services().list();
 		Assert.assertEquals(1, list.getItems().size());
@@ -121,8 +123,10 @@ public class Fabric8ClientTest {
 		Assert.assertTrue(ports.stream()
 			.anyMatch(p -> p.getPort() == options.getConfiguration().getInteger(RestOptions.PORT)));
 
-		Endpoint endpoint = future.get();
-		Assert.assertEquals("192.168.0.1", endpoint.getAddress());
-		Assert.assertEquals(options.getConfiguration().getInteger(RestOptions.PORT), endpoint.getPort());
+		FlinkService flinkService = future.get();
+		Map<ConfigOption<Integer>, Endpoint> epMap = flinkKubeClient.extractEndpoints(flinkService);
+		Assert.assertEquals("192.168.0.1", epMap.get(RestOptions.PORT).getAddress());
+		Assert.assertEquals(options.getConfiguration().getInteger(RestOptions.PORT),
+			epMap.get(RestOptions.PORT).getPort());
 	}
 }

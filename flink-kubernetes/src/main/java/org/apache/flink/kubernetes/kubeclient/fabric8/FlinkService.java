@@ -31,4 +31,9 @@ public class FlinkService extends Resource<Service> {
 		super(flinkOptions);
 		this.internalResource = new Service();
 	}
+
+	public FlinkService(FlinkKubernetesOptions flinkOptions, Service service) {
+		super(flinkOptions);
+		this.internalResource = service;
+	}
 }

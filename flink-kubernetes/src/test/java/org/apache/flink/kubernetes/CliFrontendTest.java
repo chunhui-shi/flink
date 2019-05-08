@@ -34,13 +34,18 @@ import java.util.List;
  * To test kubernetes related commands started from CliFrontend, such as 'bin/flink run -k8s..'.
  */
 public class CliFrontendTest {
+
 	@Test(expected = CliArgsException.class)
-	public void testRemoteKube() throws Exception {
+	public void testRunRemoteKube() throws Exception {
 		// test unrecognized option
 		String[] parameters = {"run",
-			"-cid", "flink-session-cluster-885dbc50-50fb-4424-b5b7-2a590675491f",
-			"-k8s", "-j", "/Users/chunhui.shi/dev/tmp/WordCount.jar", "--input", "/Users/chunhui.shi/dev/tmp/README.md",
-			"--output", "/Users/chunhui.shi/dev/tmp/out.txt"};
+			"-cid", "flink-session-cluster-938a01fd-7d15-475f-8772-b5c9ee9fe982",
+			"-k8s",
+			//"-Dk8s.debugmode.enable=true",
+			"-j", "/Users/chunhui.shi/dev/tmp/WordCount.jar",
+			"--input", "/Users/chunhui.shi/dev/tmp/README.md",
+			"--output", "/Users/chunhui.shi/dev/tmp/out.txt"
+		};
 
 		CliFrontend testFrontend = getCliFrontendAsMain();
 		SecurityUtils.install(new SecurityConfiguration(testFrontend.getConfiguration()));
@@ -49,10 +54,22 @@ public class CliFrontendTest {
 		System.exit(retCode);
 	}
 
-	//-----------------------------
+	@Test(expected = CliArgsException.class)
+	public void testStartSessionCluster() throws Exception {
+
+	}
+
+	/**
+	 * When CliFrontend is called from bin/flink, the configuration and CustomCommandLine should be
+	 * created to load both CliFrontend and KubeCustomCli
+	 * @return
+	 * @throws Exception
+	 */
 	public static CliFrontend getCliFrontendAsMain() throws Exception {
 		// 1. find the configuration directory
-		final String configurationDirectory = "/Users/chunhui.shi/work/mini/conf";
+
+		final String configurationDirectory =
+			"/Users/chunhui.shi/dev/chunhui-shi/flink/flink-dist/target/flink-1.9-SNAPSHOT-bin/flink-1.9-SNAPSHOT/conf";
 		//CliFrontend.getConfigurationDirectoryFromEnv();
 
 		// 2. load the global configuration

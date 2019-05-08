@@ -99,6 +99,7 @@ public class KubernetesCustomCli extends AbstractCustomCommandLine<String> {
 	public ClusterDescriptor<String> createClusterDescriptor(CommandLine commandLine) throws FlinkException {
 		try {
 			FlinkKubernetesOptions options = FlinkKubernetesOptions.fromCommandLine(commandLine);
+			addBackConfigurations(options, this.configuration);
 			return new KubernetesClusterDescriptor(options);
 		} catch (Exception e) {
 			throw new FlinkException("Could not create the KubernetesClusterDescriptor.", e);
@@ -110,6 +111,9 @@ public class KubernetesCustomCli extends AbstractCustomCommandLine<String> {
 	public String getClusterId(CommandLine commandLine) {
 		try {
 			FlinkKubernetesOptions options = FlinkKubernetesOptions.fromCommandLine(commandLine);
+
+			//
+			addBackConfigurations(options, this.configuration);
 
 			if (options.getClusterId() != null) {
 				return options.getClusterId();
@@ -300,6 +304,18 @@ public class KubernetesCustomCli extends AbstractCustomCommandLine<String> {
 		}
 
 		System.exit(retCode);
+	}
+
+	/**
+	 * Add the key-value in conf to the configuration in flinkOptions.
+	 * Overwrite the value if the same key was found in flinkOptions.
+	 * @param conf
+	 * @param flinkOptions
+	 */
+	private void addBackConfigurations(FlinkKubernetesOptions flinkOptions, Configuration conf) {
+		Configuration tmpConfig = flinkOptions.getConfiguration();
+		flinkOptions.getConfiguration().addAll(conf);
+		flinkOptions.getConfiguration().addAll(tmpConfig);
 	}
 
 	private static int handleCliArgsException(CliArgsException e) {

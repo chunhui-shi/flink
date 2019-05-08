@@ -24,15 +24,19 @@ import org.apache.flink.client.deployment.ClusterRetrieveException;
 import org.apache.flink.client.deployment.ClusterSpecification;
 import org.apache.flink.client.program.ClusterClient;
 import org.apache.flink.client.program.rest.RestClusterClient;
+import org.apache.flink.configuration.ConfigOption;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.configuration.JobManagerOptions;
+import org.apache.flink.configuration.RestOptions;
 import org.apache.flink.kubernetes.FlinkKubernetesOptions;
 import org.apache.flink.kubernetes.kubeclient.Endpoint;
 import org.apache.flink.kubernetes.kubeclient.KubeClient;
 import org.apache.flink.kubernetes.kubeclient.KubeClientFactory;
+import org.apache.flink.kubernetes.kubeclient.fabric8.FlinkService;
 import org.apache.flink.runtime.jobgraph.JobGraph;
 import org.apache.flink.util.FlinkException;
 
+import io.fabric8.kubernetes.api.model.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import sun.reflect.generics.reflectiveObjects.NotImplementedException;
@@ -41,6 +45,7 @@ import javax.annotation.Nonnull;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -77,19 +82,36 @@ public class KubernetesClusterDescriptor implements ClusterDescriptor<String> {
 		return CLUSTER_DESCRIPTION;
 	}
 
-	private ClusterClient<String> createClusterEndpoint(Endpoint clusterEndpoint, String clusterId) throws Exception {
+	private ClusterClient<String> createClusterClient(FlinkService clusterService, String clusterId) throws Exception {
+
+		Service internalService = clusterService.getInternalResource();
 
 		Configuration configuration = new Configuration(this.options.getConfiguration());
-		configuration.setString(JobManagerOptions.ADDRESS, clusterEndpoint.getAddress());
-		configuration.setInteger(JobManagerOptions.PORT, clusterEndpoint.getPort());
+
+		//now update the access info of new service: JM.addr, JM.port, rest.port
+		Map<ConfigOption<Integer>, Endpoint> epMap = this.client.extractEndpoints(clusterService);
+
+		if (epMap.containsKey(RestOptions.PORT)) {
+			configuration.setString(RestOptions.ADDRESS,
+				epMap.get(RestOptions.PORT).getAddress());
+			configuration.setInteger(RestOptions.PORT,
+				epMap.get(RestOptions.PORT).getPort());
+		}
+		if (epMap.containsKey(JobManagerOptions.PORT)) {
+			configuration.setString(JobManagerOptions.ADDRESS,
+				epMap.get(JobManagerOptions.PORT).getAddress());
+			configuration.setInteger(JobManagerOptions.PORT,
+				epMap.get(JobManagerOptions.PORT).getPort());
+		}
+
 		return new RestClusterClient<>(configuration, clusterId);
 	}
 
 	@Override
 	public ClusterClient<String> retrieve(String clusterId) throws ClusterRetrieveException {
 		try {
-			Endpoint clusterEndpoint = this.client.getRestEndpoint(clusterId);
-			return this.createClusterEndpoint(clusterEndpoint, clusterId);
+			FlinkService clusterService = this.client.getFlinkService(clusterId);
+			return this.createClusterClient(clusterService, clusterId);
 		} catch (Exception e) {
 			this.client.logException(e);
 			throw new ClusterRetrieveException("Could not create the RestClusterClient.", e);
@@ -116,9 +138,9 @@ public class KubernetesClusterDescriptor implements ClusterDescriptor<String> {
 	@Nonnull
 	private ClusterClient<String> deployClusterInternal(String clusterId, List<String> args) throws ClusterDeploymentException {
 		try {
-			Endpoint clusterEndpoint = this.client.createClusterService(clusterId).get();
+			FlinkService clusterService = this.client.createClusterService(clusterId).get();
 			this.client.createClusterPod();
-			return this.createClusterEndpoint(clusterEndpoint, clusterId);
+			return this.createClusterClient(clusterService, clusterId);
 		} catch (Exception e) {
 			this.client.logException(e);
 			this.tryKillCluster(clusterId);

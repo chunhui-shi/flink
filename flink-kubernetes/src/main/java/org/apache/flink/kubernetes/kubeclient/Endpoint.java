@@ -39,4 +39,13 @@ public class Endpoint {
 	public int getPort() {
 		return port;
 	}
+
+	public void setAddress(String addr) {
+		this.address = addr;
+	}
+
+	public void setPort(int port) {
+		this.port = port;
+	}
+
 }

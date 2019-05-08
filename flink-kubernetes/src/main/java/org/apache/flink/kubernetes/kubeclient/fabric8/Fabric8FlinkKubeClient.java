@@ -18,6 +18,8 @@
 
 package org.apache.flink.kubernetes.kubeclient.fabric8;
 
+import org.apache.flink.configuration.ConfigOption;
+import org.apache.flink.configuration.JobManagerOptions;
 import org.apache.flink.configuration.RestOptions;
 import org.apache.flink.kubernetes.FlinkKubernetesOptions;
 import org.apache.flink.kubernetes.kubeclient.Endpoint;
@@ -36,13 +38,16 @@ import org.apache.flink.kubernetes.kubeclient.fabric8.decorators.debug.PodDebugD
 
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.Service;
+import io.fabric8.kubernetes.api.model.ServicePort;
 import io.fabric8.kubernetes.client.KubernetesClient;
 import io.fabric8.kubernetes.client.Watcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
@@ -99,7 +104,7 @@ public class Fabric8FlinkKubeClient implements KubeClient {
 		for (Decorator<Pod, FlinkPod> d : this.clusterPodDecorators) {
 			pod = d.decorate(pod);
 		}
-		LOG.info(pod.getInternalResource().getSpec().toString());
+		LOG.info("createClusterPod with spec: " + pod.getInternalResource().getSpec().toString());
 
 		this.internalClient.pods().create(pod.getInternalResource());
 	}
@@ -125,62 +130,101 @@ public class Fabric8FlinkKubeClient implements KubeClient {
 	}
 
 	/**
-	 * Extract service address.
-	 * */
-	private String extractServiceAddress(Service service) {
-		if (this.flinkKubeOptions.getIsDebugMode()
-			&& this.flinkKubeOptions.getExternalIP() != null) {
-			//TODO preconditions check
-			return this.flinkKubeOptions.getExternalIP();
+	 * To get nodePort of configured ports.
+	 */
+	private int getExposedServicePort(Service service, ConfigOption<Integer> configPort) {
+		int port = this.flinkKubeOptions.getServicePort(configPort);
+		int exposedPort = port;
+		for (ServicePort p : service.getSpec().getPorts()) {
+			if (p.getPort() == port) {
+				return p.getNodePort();
+			}
 		}
-		if (service.getStatus() != null
+		return exposedPort;
+	}
+
+	/**
+	 * Extract service address Endpoint.
+	 * There are different cases to extract service address(IP and port) from a service.
+	 * 1, when the service is default 'ClusterIP'. In this case the IP is not accessible from the outside
+	 * 2, when the service is LoadBalancer.
+	 *
+	 * @param flinkService
+	 */
+	public Map<ConfigOption<Integer>, Endpoint> extractEndpoints(FlinkService flinkService) {
+		Map<ConfigOption<Integer>, Endpoint> epMap = new HashMap<>();
+		Service service = flinkService.getInternalResource();
+		String addrStr = null;
+		int jmPort = JobManagerOptions.PORT.defaultValue();
+		int restPort = RestOptions.PORT.defaultValue();
+
+		if (this.flinkKubeOptions.getIsDebugMode()
+			&& this.flinkKubeOptions.getExternalIP() != null && this.flinkKubeOptions.getExternalIP() != "") {
+			LOG.debug("extract externalIP in config: " + this.flinkKubeOptions.getExternalIP());
+			//TODO preconditions check
+			addrStr = this.flinkKubeOptions.getExternalIP();
+		}
+		else if (service.getStatus() != null
 			&& service.getStatus().getLoadBalancer() != null
-			&& service.getStatus().getLoadBalancer().getIngress() != null
-			&& service.getStatus().getLoadBalancer().getIngress().size() > 0
-			) {
-			return service.getStatus().getLoadBalancer().getIngress().get(0).getIp();
+			&& service.getStatus().getLoadBalancer().getIngress() != null) {
+			if (service.getStatus().getLoadBalancer().getIngress().size() > 0) {
+				addrStr = service.getStatus().getLoadBalancer().getIngress().get(0).getIp();
+			} else { //LoadBalancer type but no Ingress
+				if (service.getSpec().getLoadBalancerIP() == null) {
+					// use the same address of this rest endpoint
+					addrStr = this.internalClient.getMasterUrl().getHost();
+					restPort = getExposedServicePort(service, RestOptions.PORT);
+					jmPort = getExposedServicePort(service, JobManagerOptions.PORT);
+				}
+			}
 		} else if (service.getSpec().getExternalIPs() != null
 			&& service.getSpec().getExternalIPs().size() > 0) {
-			return service.getSpec().getExternalIPs().get(0);
+			LOG.debug("extract externalIP in spec: " + service.getSpec().getExternalIPs().get(0));
+			addrStr = service.getSpec().getExternalIPs().get(0);
 		}
 
-		return null;
+		epMap.put(RestOptions.PORT, new Endpoint(addrStr, restPort));
+		epMap.put(JobManagerOptions.PORT, new Endpoint(addrStr, jmPort));
+
+		return epMap;
 	}
 
 	@Override
-	public CompletableFuture<Endpoint> createClusterService(String clusterId) {
+	public CompletableFuture<FlinkService> createClusterService(String clusterId) {
 		this.flinkKubeOptions.setClusterId(clusterId);
-		FlinkService service = new FlinkService(this.flinkKubeOptions);
+		FlinkService flinkService = new FlinkService(this.flinkKubeOptions);
 
 		for (Decorator<Service, FlinkService> d : this.serviceDecorators) {
-			service = d.decorate(service);
+			flinkService = d.decorate(flinkService);
 		}
 
-		LOG.info(service.getInternalResource().getSpec().toString());
+		LOG.info(flinkService.getInternalResource().getSpec().toString());
 
-		this.internalClient.services().create(service.getInternalResource());
+		this.internalClient.services().create(flinkService.getInternalResource());
 
-		ActionWatcher<Service> watcher = new ActionWatcher<>(Watcher.Action.ADDED, service.getInternalResource());
+		ActionWatcher<Service> watcher = new ActionWatcher<>(Watcher.Action.ADDED,
+			flinkService.getInternalResource());
 		this.internalClient.services().watch(watcher);
 
 		return CompletableFuture.supplyAsync(() -> {
 			Service createdService = watcher.await(1, TimeUnit.MINUTES);
-			String address = extractServiceAddress(createdService);
-			if (address == null) {
-				address = "127.0.0.1";
-				LOG.warn("extractServiceAddress got null address for createdService: ", createdService);
-			}
-			else {
-				this.flinkKubeOptions.getConfiguration().setString(RestOptions.ADDRESS, address);
-			}
+			FlinkService retFlinkService = new FlinkService(this.flinkKubeOptions, createdService);
+			/*
+			Endpoint accesspoint = extractServiceAddress(createdService, RestOptions.PORT);
+
+			LOG.info("createClusterService addr=" + accesspoint.getAddress() +
+				" port=" + accesspoint.getPort());
+			// we are using the REST port in configuration to create port
+			accesspoint.setPort(this.flinkKubeOptions.getServicePort(RestOptions.PORT));
+			this.flinkKubeOptions.getConfiguration().setString(RestOptions.ADDRESS, accesspoint.getAddress());
 
 			String uuid = createdService.getMetadata().getUid();
 			if (uuid != null) {
 				flinkKubeOptions.setServiceUUID(uuid);
 			}
+			*/
+			return retFlinkService;
 
-			int uiPort = this.flinkKubeOptions.getServicePort(RestOptions.PORT);
-			return new Endpoint(address, uiPort);
 		});
 	}
 
@@ -200,7 +244,7 @@ public class Fabric8FlinkKubeClient implements KubeClient {
 	}
 
 	@Override
-	public Endpoint getRestEndpoint(String clusterId) {
+	public FlinkService getFlinkService(String clusterId) {
 		String ns = (this.flinkKubeOptions.getNamespace() == null) ? "default" : this.flinkKubeOptions.getNamespace();
 		Service service = this.internalClient.services().inNamespace(ns).withName(clusterId).fromServer().get();
 		if (service == null) {
@@ -208,10 +252,15 @@ public class Fabric8FlinkKubeClient implements KubeClient {
 			return null;
 		}
 
-		String address = extractServiceAddress(service);
-		int port = service.getSpec().getPorts().get(0).getPort();
+		FlinkService flinkService = new FlinkService(this.flinkKubeOptions);
+		flinkService.setInternalResource(service);
+		return flinkService;
 
-		return new Endpoint(address, port);
+//		Endpoint accesspoint = extractServiceAddress(service, JobManagerOptions.PORT);
+//		LOG.info("getRestEndpoint addr=" + accesspoint.getAddress() +
+//			" port=" + accesspoint.getPort());
+
+//		return accesspoint;
 	}
 
 	@Override

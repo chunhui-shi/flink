@@ -18,7 +18,11 @@
 
 package org.apache.flink.kubernetes.kubeclient;
 
+import org.apache.flink.configuration.ConfigOption;
+import org.apache.flink.kubernetes.kubeclient.fabric8.FlinkService;
+
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -34,7 +38,7 @@ public interface KubeClient extends AutoCloseable {
 	/**
 	 * Create kubernetes services and expose endpoints for access outside cluster.
 	 */
-	CompletableFuture<Endpoint> createClusterService(String clusterId) throws Exception;
+	CompletableFuture<FlinkService> createClusterService(String clusterId) throws Exception;
 
 	/**
 	 * List all running sessions in current kubernetes cluster.
@@ -67,7 +71,13 @@ public interface KubeClient extends AutoCloseable {
 	void logException(Exception e);
 
 	/**
-	 * retrieval rest endpoint of the giving flink clusterId.
+	 * retrieve rest endpoint of the given flink clusterId.
 	 */
-	Endpoint getRestEndpoint(String flinkClusterId);
+	FlinkService getFlinkService(String flinkClusterId);
+
+	/**
+	 *  For a FlinkService, get its port maps.
+	 * @param service
+	 */
+	Map<ConfigOption<Integer>, Endpoint> extractEndpoints(FlinkService service);
 }
