@@ -60,8 +60,7 @@ public class CliFrontendTest {
 	}
 
 	/**
-	 * When CliFrontend is called from bin/flink, the configuration and CustomCommandLine should be
-	 * created to load both CliFrontend and KubeCustomCli
+	 * To load the same configurations when CliFrontend is called from {CliFrontend.main}.
 	 * @return
 	 * @throws Exception
 	 */
