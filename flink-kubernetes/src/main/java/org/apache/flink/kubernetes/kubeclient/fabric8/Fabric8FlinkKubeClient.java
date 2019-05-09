@@ -217,12 +217,12 @@ public class Fabric8FlinkKubeClient implements KubeClient {
 			// we are using the REST port in configuration to create port
 			accesspoint.setPort(this.flinkKubeOptions.getServicePort(RestOptions.PORT));
 			this.flinkKubeOptions.getConfiguration().setString(RestOptions.ADDRESS, accesspoint.getAddress());
-
+			*/
 			String uuid = createdService.getMetadata().getUid();
 			if (uuid != null) {
 				flinkKubeOptions.setServiceUUID(uuid);
 			}
-			*/
+
 			return retFlinkService;
 
 		});
@@ -255,12 +255,6 @@ public class Fabric8FlinkKubeClient implements KubeClient {
 		FlinkService flinkService = new FlinkService(this.flinkKubeOptions);
 		flinkService.setInternalResource(service);
 		return flinkService;
-
-//		Endpoint accesspoint = extractServiceAddress(service, JobManagerOptions.PORT);
-//		LOG.info("getRestEndpoint addr=" + accesspoint.getAddress() +
-//			" port=" + accesspoint.getPort());
-
-//		return accesspoint;
 	}
 
 	@Override
