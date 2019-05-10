@@ -85,7 +85,7 @@ public class PodDebugDecorator extends Decorator<Pod, FlinkPod> {
 		List<VolumeMount> mounts = container.getVolumeMounts();
 		mounts.add(new VolumeMountBuilder()
 			.withName(FLINK_DIST_VOLUME_NAME)
-			.withMountPath("/opt/flink")
+			.withMountPath("/opt")
 			.build());
 
 		mounts.add(new VolumeMountBuilder()
