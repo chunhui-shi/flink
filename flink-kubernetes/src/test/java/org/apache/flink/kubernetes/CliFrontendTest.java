@@ -61,8 +61,6 @@ public class CliFrontendTest {
 
 	/**
 	 * To load the same configurations when CliFrontend is called from CliFrontend.main.
-	 * @return
-	 * @throws Exception
 	 */
 	public static CliFrontend getCliFrontendAsMain() throws Exception {
 		// 1. find the configuration directory
