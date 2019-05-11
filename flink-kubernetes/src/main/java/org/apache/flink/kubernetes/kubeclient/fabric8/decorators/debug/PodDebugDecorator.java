@@ -58,6 +58,7 @@ public class PodDebugDecorator extends Decorator<Pod, FlinkPod> {
 
 		args.add("-D" + FlinkKubernetesOptions.DEBUG_MODE.key() + "=true");
 
+/*      // enable adding volumes when it is needed.
 		Volume flinkProjectVolume = new VolumeBuilder()
 			.withName(FLINK_DIST_VOLUME_NAME)
 			.withHostPath(new HostPathVolumeSource(
@@ -103,7 +104,7 @@ public class PodDebugDecorator extends Decorator<Pod, FlinkPod> {
 		.withName("EXTRA_CLASSPATHS")
 		.withValue("/flink-root/flink-kubernetes/target/classes")
 		.build());
-
+*/
 		return resource;
 	}
 }
