@@ -46,19 +46,10 @@ public class PodDebugDecorator extends Decorator<Pod, FlinkPod> {
 	public static final String FLINK_PROJECT_VOLUME_NAME = "flink-root-volume";
 	public static final String FLINK_PROJECT_VOLUME_PATH = "/flink-root/";
 
-	@Override
-	protected Pod doDecorate(Pod resource, FlinkKubernetesOptions flinkKubernetesOptions) {
-
-		Preconditions.checkArgument(flinkKubernetesOptions != null && flinkKubernetesOptions.getIsDebugMode());
-		Preconditions.checkArgument(resource.getSpec() != null && resource.getSpec().getContainers() != null);
-
-		PodSpec spec = resource.getSpec();
+	private void addDebugVolumes(PodSpec spec) {
 		Container container = spec.getContainers().get(0);
-		List<String> args = container.getArgs();
 
-		args.add("-D" + FlinkKubernetesOptions.DEBUG_MODE.key() + "=true");
-
-/*      // enable adding volumes when it is needed.
+		// enable adding volumes when it is needed.
 		Volume flinkProjectVolume = new VolumeBuilder()
 			.withName(FLINK_DIST_VOLUME_NAME)
 			.withHostPath(new HostPathVolumeSource(
@@ -101,10 +92,24 @@ public class PodDebugDecorator extends Decorator<Pod, FlinkPod> {
 		List<EnvVar> envs = container.getEnv();
 
 		envs.add(new EnvVarBuilder()
-		.withName("EXTRA_CLASSPATHS")
-		.withValue("/flink-root/flink-kubernetes/target/classes")
-		.build());
-*/
+			.withName("EXTRA_CLASSPATHS")
+			.withValue("/flink-root/flink-kubernetes/target/classes")
+			.build());
+
+	}
+
+	@Override
+	protected Pod doDecorate(Pod resource, FlinkKubernetesOptions flinkKubernetesOptions) {
+
+		Preconditions.checkArgument(flinkKubernetesOptions != null && flinkKubernetesOptions.getIsDebugMode());
+		Preconditions.checkArgument(resource.getSpec() != null && resource.getSpec().getContainers() != null);
+
+		PodSpec spec = resource.getSpec();
+		Container container = spec.getContainers().get(0);
+		List<String> args = container.getArgs();
+
+		args.add("-D" + FlinkKubernetesOptions.DEBUG_MODE.key() + "=true");
+
 		return resource;
 	}
 }
