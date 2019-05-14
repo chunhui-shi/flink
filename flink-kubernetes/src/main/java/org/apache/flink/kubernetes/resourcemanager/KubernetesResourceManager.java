@@ -19,6 +19,7 @@
 package org.apache.flink.kubernetes.resourcemanager;
 
 import org.apache.flink.annotation.VisibleForTesting;
+import org.apache.flink.configuration.JobManagerOptions;
 import org.apache.flink.configuration.TaskManagerOptions;
 import org.apache.flink.kubernetes.FlinkKubernetesOptions;
 import org.apache.flink.kubernetes.kubeclient.KubeClient;
@@ -93,11 +94,20 @@ public class KubernetesResourceManager extends ResourceManager<KubernetesResourc
 
 		int numberOfTaskSlots = flinkKubernetesOptions.getConfiguration().getInteger(TaskManagerOptions.NUM_TASK_SLOTS);
 		this.slotsPerWorker = createSlotsPerWorker(numberOfTaskSlots);
+
 	}
 
 	@Override
 	protected void initialize() {
 		LOG.info("Initializing Kubernetes client.");
+		if (this.flinkKubernetesOptions.getClusterId() == null) {
+			String clusterId = this.flinkKubernetesOptions.getConfiguration()
+				.getString(JobManagerOptions.ADDRESS.key(), "");
+			this.flinkKubernetesOptions.setClusterId(clusterId);
+		}
+		LOG.info("KubernetesResourceManager.initialize clusterId:" + this.flinkKubernetesOptions.getClusterId());
+		LOG.info("KubernetesResourceManager.initialize image:" + this.flinkKubernetesOptions.getImageName());
+
 		this.kubeClient = KubeClientFactory.fromConfiguration(this.flinkKubernetesOptions);
 		this.kubeClient.initialize();
 	}

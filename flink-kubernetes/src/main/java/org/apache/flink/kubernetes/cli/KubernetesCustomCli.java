@@ -100,6 +100,7 @@ public class KubernetesCustomCli extends AbstractCustomCommandLine<String> {
 		try {
 			FlinkKubernetesOptions options = FlinkKubernetesOptions.fromCommandLine(commandLine);
 			addBackConfigurations(options, this.configuration);
+
 			return new KubernetesClusterDescriptor(options);
 		} catch (Exception e) {
 			throw new FlinkException("Could not create the KubernetesClusterDescriptor.", e);
