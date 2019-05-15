@@ -105,6 +105,8 @@ public class Fabric8FlinkKubeClient implements KubeClient {
 			pod = d.decorate(pod);
 		}
 		LOG.info("createClusterPod with spec: " + pod.getInternalResource().getSpec().toString());
+		LOG.info("createClusterPod with flinkOption.image: " + this.flinkKubeOptions.getImageName()
+		    + "clusterId");
 
 		this.internalClient.pods().create(pod.getInternalResource());
 	}

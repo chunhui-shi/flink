@@ -38,7 +38,7 @@ import java.util.stream.Collectors;
  * */
 public class TaskManagerDecorator extends Decorator<Pod, FlinkPod> {
 
-	private static final String CONTAINER_NAME = "TaskManager";
+	private static final String CONTAINER_NAME = "flink-task-manager";
 
 	TaskManagerPodParameter parameter;
 
@@ -51,7 +51,6 @@ public class TaskManagerDecorator extends Decorator<Pod, FlinkPod> {
 	protected Pod doDecorate(Pod resource, FlinkKubernetesOptions flinkKubernetesOptions) {
 
 		Preconditions.checkArgument(flinkKubernetesOptions != null && flinkKubernetesOptions.getClusterId() != null);
-
 		Map<String, String> labels = LabelBuilder
 			.withExist(resource.getMetadata().getLabels())
 			.withTaskManagerRole()
