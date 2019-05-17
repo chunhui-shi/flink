@@ -106,7 +106,7 @@ public class Fabric8FlinkKubeClient implements KubeClient {
 		}
 		LOG.info("createClusterPod with spec: " + pod.getInternalResource().getSpec().toString());
 		LOG.info("createClusterPod with flinkOption.image: " + this.flinkKubeOptions.getImageName()
-		    + "clusterId");
+			+ "clusterId" + this.flinkKubeOptions.getClusterId());
 
 		this.internalClient.pods().create(pod.getInternalResource());
 	}
@@ -120,6 +120,9 @@ public class Fabric8FlinkKubeClient implements KubeClient {
 		}
 
 		pod = new TaskManagerDecorator(parameter).decorate(pod);
+		LOG.info("createTaskManagerPod with spec: " + pod.getInternalResource().getSpec().toString());
+		LOG.info("createTaskManagerPod with flinkOption.image: " + this.flinkKubeOptions.getImageName()
+			+ "clusterId" + this.flinkKubeOptions.getClusterId());
 
 		this.internalClient.pods().create(pod.getInternalResource());
 
