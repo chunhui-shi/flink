@@ -30,14 +30,17 @@ public class TaskManagerPodParameter {
 
 	private String podName;
 
+	private String imageName;
+
 	private List<String> args;
 
 	private ResourceProfile resourceProfile;
 
 	private Map<String, String> environmentVariables;
 
-	public TaskManagerPodParameter(String podName, List<String> args, ResourceProfile resourceProfile, Map<String, String> environmentVariables) {
+	public TaskManagerPodParameter(String podName, String imageName, List<String> args, ResourceProfile resourceProfile, Map<String, String> environmentVariables) {
 		this.podName = podName;
+		this.imageName = imageName;
 		this.args = args;
 		this.resourceProfile = resourceProfile;
 		this.environmentVariables = environmentVariables;
@@ -57,5 +60,9 @@ public class TaskManagerPodParameter {
 
 	public Map<String, String> getEnvironmentVariables() {
 		return environmentVariables;
+	}
+
+	public String getImageName() {
+		return imageName;
 	}
 }
