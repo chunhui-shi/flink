@@ -123,6 +123,8 @@ public class KubernetesResourceManager extends ResourceManager<KubernetesResourc
 
 		Preconditions.checkNotNull(this.kubeClient);
 		String podName = TASKMANAGER_ID_PREFIX + UUID.randomUUID();
+		String imageName = flinkKubernetesOptions.getImageName();
+		Preconditions.checkNotNull(imageName);
 		LOG.info("creating new worker, worker podName: {}", podName);
 
 		try {
@@ -139,6 +141,7 @@ public class KubernetesResourceManager extends ResourceManager<KubernetesResourc
 
 			TaskManagerPodParameter parameter = new TaskManagerPodParameter(
 				podName,
+				imageName,
 				args,
 				resourceProfile,
 				env);

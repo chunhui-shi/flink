@@ -53,9 +53,9 @@ public class JobManagerPodDecorator extends Decorator<Pod, FlinkPod> {
 
 		List<String> args = Arrays.asList(
 			"cluster",
-			FlinkKubernetesOptions.IMAGE_OPTION.getLongOpt(),
+			"-" + FlinkKubernetesOptions.IMAGE_OPTION.getLongOpt(),
 			flinkKubernetesOptions.getImageName(),
-			FlinkKubernetesOptions.CLUSTERID_OPTION.getLongOpt(),
+			"-" + FlinkKubernetesOptions.CLUSTERID_OPTION.getLongOpt(),
 			flinkKubernetesOptions.getClusterId()
 		);
 
