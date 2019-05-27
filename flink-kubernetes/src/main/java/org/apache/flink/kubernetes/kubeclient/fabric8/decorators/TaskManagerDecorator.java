@@ -18,17 +18,16 @@
 
 package org.apache.flink.kubernetes.kubeclient.fabric8.decorators;
 
-import io.fabric8.kubernetes.api.model.PodSpec;
 import org.apache.flink.kubernetes.FlinkKubernetesOptions;
 import org.apache.flink.kubernetes.kubeclient.TaskManagerPodParameter;
 import org.apache.flink.kubernetes.kubeclient.fabric8.FlinkPod;
-import org.apache.flink.runtime.jobmaster.JobManagerRunner;
 import org.apache.flink.util.Preconditions;
 
 import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.ContainerBuilder;
 import io.fabric8.kubernetes.api.model.EnvVar;
 import io.fabric8.kubernetes.api.model.Pod;
+import io.fabric8.kubernetes.api.model.PodSpec;
 import io.fabric8.kubernetes.api.model.PodSpecBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
