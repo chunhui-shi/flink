@@ -125,7 +125,7 @@ public class Fabric8FlinkKubeClient implements KubeClient {
 			pod = d.decorate(pod);
 		}
 
-		LOG.info("Spec before TaskMgmt decorate: " + pod.getInternalResource().getSpec().toString());
+		//LOG.info("Spec before TaskMgmt decorate: " + pod.getInternalResource().getSpec().toString());
 		pod = new TaskManagerDecorator(parameter).decorate(pod);
 		LOG.info("createTaskManagerPod with flinkOption.image: " + this.flinkKubeOptions.getImageName()
 			+ ", clusterId: " + this.flinkKubeOptions.getClusterId());

@@ -18,9 +18,11 @@
 
 package org.apache.flink.kubernetes.kubeclient.fabric8.decorators;
 
+import io.fabric8.kubernetes.api.model.PodSpec;
 import org.apache.flink.kubernetes.FlinkKubernetesOptions;
 import org.apache.flink.kubernetes.kubeclient.TaskManagerPodParameter;
 import org.apache.flink.kubernetes.kubeclient.fabric8.FlinkPod;
+import org.apache.flink.runtime.jobmaster.JobManagerRunner;
 import org.apache.flink.util.Preconditions;
 
 import io.fabric8.kubernetes.api.model.Container;
@@ -28,6 +30,8 @@ import io.fabric8.kubernetes.api.model.ContainerBuilder;
 import io.fabric8.kubernetes.api.model.EnvVar;
 import io.fabric8.kubernetes.api.model.Pod;
 import io.fabric8.kubernetes.api.model.PodSpecBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
 import java.util.Map;
@@ -37,6 +41,8 @@ import java.util.stream.Collectors;
  * Task manager specific pod configuration.
  * */
 public class TaskManagerDecorator extends Decorator<Pod, FlinkPod> {
+
+	private static final Logger LOG = LoggerFactory.getLogger(TaskManagerDecorator.class);
 
 	private static final String CONTAINER_NAME = "flink-task-manager";
 
@@ -59,6 +65,7 @@ public class TaskManagerDecorator extends Decorator<Pod, FlinkPod> {
 		resource.getMetadata().setLabels(labels);
 		resource.getMetadata().setName(this.parameter.getPodName());
 
+		LOG.info("TaskManagerDecorator before ContainerBuilder.build");
 		Container container = new ContainerBuilder()
 			.withName(CONTAINER_NAME)
 			.withImage(flinkKubernetesOptions.getImageName())
@@ -71,7 +78,11 @@ public class TaskManagerDecorator extends Decorator<Pod, FlinkPod> {
 				.collect(Collectors.toList()))
 			.build();
 
-		resource.setSpec(new PodSpecBuilder().withContainers(Arrays.asList(container)).build());
+		LOG.info("TaskManagerDecorator before ContainerBuilder.build");
+		PodSpec podSpec = new PodSpecBuilder().withContainers(Arrays.asList(container)).build();
+		LOG.info("podSpec = " + podSpec.toString());
+
+		resource.setSpec(podSpec);
 		return resource;
 	}
 }
