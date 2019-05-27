@@ -45,6 +45,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -113,16 +114,21 @@ public class Fabric8FlinkKubeClient implements KubeClient {
 
 	@Override
 	public String createTaskManagerPod(TaskManagerPodParameter parameter) {
+		LOG.info("start createTaskManagerPod with parameter.args: " + Arrays.toString(parameter.getArgs().toArray())
+			+ ", parameter.podName: " + parameter.getPodName()
+			+ ", parameter.env: " + Arrays.toString(parameter.getEnvironmentVariables().keySet().toArray())
+			+ ", paramter. : "  + parameter.getResourceProfile().toString());
+
 		FlinkPod pod = new FlinkPod(this.flinkKubeOptions);
 
 		for (Decorator<Pod, FlinkPod> d : this.taskManagerPodDecorators) {
 			pod = d.decorate(pod);
 		}
 
+		LOG.info("Spec before TaskMgmt decorate: " + pod.getInternalResource().getSpec().toString());
 		pod = new TaskManagerDecorator(parameter).decorate(pod);
-		LOG.info("createTaskManagerPod with spec: " + pod.getInternalResource().getSpec().toString());
 		LOG.info("createTaskManagerPod with flinkOption.image: " + this.flinkKubeOptions.getImageName()
-			+ "clusterId" + this.flinkKubeOptions.getClusterId());
+			+ ", clusterId: " + this.flinkKubeOptions.getClusterId());
 
 		this.internalClient.pods().create(pod.getInternalResource());
 
