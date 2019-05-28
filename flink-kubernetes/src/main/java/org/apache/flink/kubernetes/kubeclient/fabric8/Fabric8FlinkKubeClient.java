@@ -117,9 +117,11 @@ public class Fabric8FlinkKubeClient implements KubeClient {
 		LOG.info("start createTaskManagerPod with parameter.args: " + Arrays.toString(parameter.getArgs().toArray())
 			+ ", parameter.podName: " + parameter.getPodName()
 			+ ", parameter.env: " + Arrays.toString(parameter.getEnvironmentVariables().keySet().toArray())
-			+ ", paramter. : "  + parameter.getResourceProfile().toString());
+			+ ", paramter.resoutrce: "  + parameter.getResourceProfile().toString()
+			+ ", paramter.imageName: " + parameter.getImageName()
+		);
 
-		taskManagerPodDecorators.add(new TaskManagerDecorator(parameter));
+		//taskManagerPodDecorators.add(new TaskManagerDecorator(parameter));
 		FlinkPod pod = new FlinkPod(this.flinkKubeOptions);
 
 		for (Decorator<Pod, FlinkPod> d : this.taskManagerPodDecorators) {
