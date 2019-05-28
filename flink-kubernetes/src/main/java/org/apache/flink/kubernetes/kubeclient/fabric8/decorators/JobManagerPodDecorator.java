@@ -28,6 +28,7 @@ import io.fabric8.kubernetes.api.model.Container;
 import io.fabric8.kubernetes.api.model.ContainerBuilder;
 import io.fabric8.kubernetes.api.model.ContainerPortBuilder;
 import io.fabric8.kubernetes.api.model.Pod;
+import io.fabric8.kubernetes.api.model.PodSpec;
 import io.fabric8.kubernetes.api.model.PodSpecBuilder;
 
 import java.util.Arrays;
@@ -71,7 +72,9 @@ public class JobManagerPodDecorator extends Decorator<Pod, FlinkPod> {
 				new ContainerPortBuilder().withContainerPort(6125).build()))
 			.build();
 
-		resource.setSpec(new PodSpecBuilder().withContainers(Arrays.asList(container)).build());
+		PodSpec spec = new PodSpecBuilder().withContainers(Arrays.asList(container)).build();
+		spec.setAutomountServiceAccountToken(true);
+		resource.setSpec(spec);
 		return resource;
 	}
 }

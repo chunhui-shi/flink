@@ -79,6 +79,7 @@ public class TaskManagerDecorator extends Decorator<Pod, FlinkPod> {
 
 		LOG.info("TaskManagerDecorator before ContainerBuilder.build");
 		PodSpec podSpec = new PodSpecBuilder().withContainers(Arrays.asList(container)).build();
+		podSpec.setAutomountServiceAccountToken(true);
 		LOG.info("podSpec = " + podSpec.toString());
 
 		resource.setSpec(podSpec);
