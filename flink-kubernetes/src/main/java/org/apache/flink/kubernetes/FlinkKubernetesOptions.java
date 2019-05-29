@@ -162,6 +162,17 @@ public class FlinkKubernetesOptions {
 		this.kubeConfigFileName = kubeConfigFileName;
 	}
 
+	public String toString() {
+		String ret = "configFilePath: " + getKubeConfigFilePath()
+			+ ", config: "  + getConfiguration().toString()
+			+ ", nameSpace: " + getNamespace()
+			+ ", externalIp: " + getExternalIP()
+			+ ", imageName: " + getImageName()
+			+ ", clusterId: " + getClusterId()
+			+ ", serviceUUID: " + getServiceUUID()
+			;
+		return ret;
+	}
 	/**
 	 * build FlinkKubernetesOption from commandline.
 	 * */

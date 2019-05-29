@@ -119,6 +119,8 @@ public class KubernetesCustomCli extends AbstractCustomCommandLine<String> {
 			if (options.getClusterId() != null) {
 				return options.getClusterId();
 			} else {
+				LOG.info("get client with options: " + options.toString());
+
 				KubeClient client = KubeClientFactory.fromConfiguration(options);
 
 				List<String> clusterList = client.listFlinkClusters();

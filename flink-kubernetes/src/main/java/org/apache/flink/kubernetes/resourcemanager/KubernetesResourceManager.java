@@ -105,8 +105,7 @@ public class KubernetesResourceManager extends ResourceManager<KubernetesResourc
 				.getString(JobManagerOptions.ADDRESS.key(), "");
 			this.flinkKubernetesOptions.setClusterId(clusterId);
 		}
-		LOG.info("KubernetesResourceManager.initialize clusterId:" + this.flinkKubernetesOptions.getClusterId());
-		LOG.info("KubernetesResourceManager.initialize image:" + this.flinkKubernetesOptions.getImageName());
+		LOG.info("get client with options: " + this.flinkKubernetesOptions.toString());
 
 		this.kubeClient = KubeClientFactory.fromConfiguration(this.flinkKubernetesOptions);
 		this.kubeClient.initialize();
