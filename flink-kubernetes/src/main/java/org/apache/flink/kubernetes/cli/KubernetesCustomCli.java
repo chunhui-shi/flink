@@ -26,6 +26,7 @@ import org.apache.flink.client.program.ClusterClient;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.configuration.GlobalConfiguration;
 import org.apache.flink.configuration.JobManagerOptions;
+import org.apache.flink.configuration.RestOptions;
 import org.apache.flink.kubernetes.FlinkKubernetesOptions;
 import org.apache.flink.kubernetes.cluster.KubernetesClusterDescriptor;
 import org.apache.flink.kubernetes.kubeclient.KubeClient;
@@ -161,7 +162,7 @@ public class KubernetesCustomCli extends AbstractCustomCommandLine<String> {
 
 		String url = String.format("http://%s:%d/#/overview"
 			, config.getString(JobManagerOptions.ADDRESS)
-			, config.getInteger(JobManagerOptions.PORT));
+			, config.getInteger(RestOptions.PORT));
 
 		System.out.println("Cluster " + clusterClient.getClusterId() + " started, web portal: " + url);
 

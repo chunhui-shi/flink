@@ -86,7 +86,7 @@ public class Fabric8FlinkKubeClient implements KubeClient {
 		this.clusterPodDecorators.add(new OwnerReferenceDecorator());
 
 		this.taskManagerPodDecorators.add(new PodInitializerDecorator());
-		this.taskManagerPodDecorators.add(new OwnerReferenceDecorator());
+		//this.taskManagerPodDecorators.add(new OwnerReferenceDecorator());
 
 		if (this.flinkKubeOptions.getIsDebugMode()) {
 			this.serviceDecorators.add(new ExternalIPDecorator());
@@ -106,14 +106,13 @@ public class Fabric8FlinkKubeClient implements KubeClient {
 		}
 		LOG.info("createClusterPod with spec: " + pod.getInternalResource().getSpec().toString());
 		LOG.info("createClusterPod with flinkOption.image: " + this.flinkKubeOptions.getImageName()
-			+ "clusterId" + this.flinkKubeOptions.getClusterId());
+			+ ", clusterId:" + this.flinkKubeOptions.getClusterId());
 
 		this.internalClient.pods().create(pod.getInternalResource());
 	}
 
 	@Override
 	public String createTaskManagerPod(TaskManagerPodParameter parameter) {
-		taskManagerPodDecorators.add(new TaskManagerDecorator(parameter));
 		FlinkPod pod = new FlinkPod(this.flinkKubeOptions);
 
 		for (Decorator<Pod, FlinkPod> d : this.taskManagerPodDecorators) {
@@ -123,7 +122,7 @@ public class Fabric8FlinkKubeClient implements KubeClient {
 		pod = new TaskManagerDecorator(parameter).decorate(pod);
 		LOG.info("createTaskManagerPod with spec: " + pod.getInternalResource().getSpec().toString());
 		LOG.info("createTaskManagerPod with flinkOption.image: " + this.flinkKubeOptions.getImageName()
-			+ "clusterId" + this.flinkKubeOptions.getClusterId());
+			+ ", clusterId:" + this.flinkKubeOptions.getClusterId());
 
 		this.internalClient.pods().create(pod.getInternalResource());
 
@@ -140,13 +139,12 @@ public class Fabric8FlinkKubeClient implements KubeClient {
 	 */
 	private int getExposedServicePort(Service service, ConfigOption<Integer> configPort) {
 		int port = this.flinkKubeOptions.getServicePort(configPort);
-		int exposedPort = port;
 		for (ServicePort p : service.getSpec().getPorts()) {
 			if (p.getPort() == port) {
 				return p.getNodePort();
 			}
 		}
-		return exposedPort;
+		return port;
 	}
 
 	/**
@@ -210,20 +208,12 @@ public class Fabric8FlinkKubeClient implements KubeClient {
 
 		ActionWatcher<Service> watcher = new ActionWatcher<>(Watcher.Action.ADDED,
 			flinkService.getInternalResource());
-		this.internalClient.services().watch(watcher);
+		this.internalClient.services().withName(clusterId).watch(watcher);
 
 		return CompletableFuture.supplyAsync(() -> {
 			Service createdService = watcher.await(1, TimeUnit.MINUTES);
 			FlinkService retFlinkService = new FlinkService(this.flinkKubeOptions, createdService);
-			/*
-			Endpoint accesspoint = extractServiceAddress(createdService, RestOptions.PORT);
 
-			LOG.info("createClusterService addr=" + accesspoint.getAddress() +
-				" port=" + accesspoint.getPort());
-			// we are using the REST port in configuration to create port
-			accesspoint.setPort(this.flinkKubeOptions.getServicePort(RestOptions.PORT));
-			this.flinkKubeOptions.getConfiguration().setString(RestOptions.ADDRESS, accesspoint.getAddress());
-			*/
 			String uuid = createdService.getMetadata().getUid();
 			if (uuid != null) {
 				flinkKubeOptions.setServiceUUID(uuid);
