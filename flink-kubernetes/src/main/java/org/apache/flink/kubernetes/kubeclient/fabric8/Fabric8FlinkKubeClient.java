@@ -86,7 +86,7 @@ public class Fabric8FlinkKubeClient implements KubeClient {
 		this.clusterPodDecorators.add(new OwnerReferenceDecorator());
 
 		this.taskManagerPodDecorators.add(new PodInitializerDecorator());
-		//this.taskManagerPodDecorators.add(new OwnerReferenceDecorator());
+		this.taskManagerPodDecorators.add(new OwnerReferenceDecorator());
 
 		if (this.flinkKubeOptions.getIsDebugMode()) {
 			this.serviceDecorators.add(new ExternalIPDecorator());
@@ -115,12 +115,16 @@ public class Fabric8FlinkKubeClient implements KubeClient {
 	public String createTaskManagerPod(TaskManagerPodParameter parameter) {
 		FlinkPod pod = new FlinkPod(this.flinkKubeOptions);
 
+		String serviceUUID = getFlinkService(this.flinkKubeOptions.getClusterId()).getInternalResource().getMetadata().getUid();
+		flinkKubeOptions.setServiceUUID(serviceUUID);
+
 		for (Decorator<Pod, FlinkPod> d : this.taskManagerPodDecorators) {
 			pod = d.decorate(pod);
 		}
 
 		pod = new TaskManagerDecorator(parameter).decorate(pod);
 		LOG.info("createTaskManagerPod with spec: " + pod.getInternalResource().getSpec().toString());
+		LOG.info("serviceUUID:" + pod.getInternalResource().getMetadata().getOwnerReferences().get(0).getUid());
 		LOG.info("createTaskManagerPod with flinkOption.image: " + this.flinkKubeOptions.getImageName()
 			+ ", clusterId:" + this.flinkKubeOptions.getClusterId());
 
@@ -231,7 +235,7 @@ public class Fabric8FlinkKubeClient implements KubeClient {
 
 	@Override
 	public void stopAndCleanupCluster(String clusterId) {
-		this.internalClient.services().withName(clusterId).delete();
+		this.internalClient.services().withName(clusterId).cascading(true).delete();
 	}
 
 	@Override
@@ -255,6 +259,13 @@ public class Fabric8FlinkKubeClient implements KubeClient {
 
 	@Override
 	public void close() {
-
+		//clear pod without owner service
+		String ns = this.flinkKubeOptions.getNamespace() == null ? "default" : this.flinkKubeOptions.getNamespace();
+		this.internalClient.pods().inNamespace(ns).withLabelIn("app", "flink-native-k8s").list().getItems().forEach(p -> {
+			String ownerName = p.getMetadata().getOwnerReferences().get(0).getName();
+			if (this.internalClient.services().inNamespace(ns).withName(ownerName).fromServer().get() == null) {
+				this.internalClient.pods().delete(p);
+			}
+		});
 	}
 }

@@ -24,9 +24,9 @@ import org.apache.flink.kubernetes.kubeclient.fabric8.FlinkPod;
 import io.fabric8.kubernetes.api.model.ObjectMeta;
 import io.fabric8.kubernetes.api.model.OwnerReferenceBuilder;
 import io.fabric8.kubernetes.api.model.Pod;
+import org.apache.flink.util.Preconditions;
 
 import java.util.Arrays;
-import java.util.UUID;
 
 /**
  * for GC.
@@ -36,9 +36,7 @@ public class OwnerReferenceDecorator extends Decorator<Pod, FlinkPod> {
 	@Override
 	protected Pod doDecorate(Pod resource, FlinkKubernetesOptions flinkKubernetesOptions) {
 
-		if (flinkKubernetesOptions.getServiceUUID() == null) {
-			flinkKubernetesOptions.setServiceUUID(UUID.randomUUID().toString());
-		}
+		Preconditions.checkNotNull(flinkKubernetesOptions.getServiceUUID(), "must specify service uuid!");
 
 		if (resource.getMetadata() == null) {
 			resource.setMetadata(new ObjectMeta());
