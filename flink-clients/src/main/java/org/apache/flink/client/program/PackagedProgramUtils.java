@@ -99,7 +99,6 @@ public class PackagedProgramUtils {
 				throw new ProgramInvocationException("Invalid URL for jar file: " + url + '.', jobGraph.getJobID(), e);
 			}
 		}
-
 		jobGraph.setClasspaths(packagedProgram.getClasspaths());
 
 		return jobGraph;

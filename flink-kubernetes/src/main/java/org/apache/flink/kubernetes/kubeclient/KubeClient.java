@@ -48,7 +48,7 @@ public interface KubeClient extends AutoCloseable {
 	/**
 	 * Create cluster pod.
 	 */
-	void createClusterPod();
+	void createClusterPod(boolean sessionMode);
 
 	/**
 	 * Create task manager pod.

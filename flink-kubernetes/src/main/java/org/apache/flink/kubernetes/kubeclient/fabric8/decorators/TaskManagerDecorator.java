@@ -53,6 +53,7 @@ public class TaskManagerDecorator extends Decorator<Pod, FlinkPod> {
 		Preconditions.checkArgument(flinkKubernetesOptions != null && flinkKubernetesOptions.getClusterId() != null);
 		Map<String, String> labels = LabelBuilder
 			.withExist(resource.getMetadata().getLabels())
+			.withClusterId(flinkKubernetesOptions.getClusterId())
 			.withTaskManagerRole()
 			.toLabels();
 

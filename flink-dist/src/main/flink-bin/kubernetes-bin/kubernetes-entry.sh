@@ -44,7 +44,7 @@ ENTRY_POINT=org.apache.flink.kubernetes.entrypoint.KubernetesSessionClusterEntry
 if [ "$MODE" = "taskmanager" ]; then
     ENTRY_POINT=org.apache.flink.kubernetes.taskmanager.KubernetesTaskManagerRunner
 elif [ "$MODE" = "job" ]; then
-    ENTRY_POINT=org.apache.flink.kubernetes.entrypoint.KubernetesJobClusterEntrypoint
+    ENTRY_POINT=org.apache.flink.kubernetes.entrypoint.KubernetesJobClusterEntrypointRunner
 fi
 
 # Evaluate user options for local variable expansion

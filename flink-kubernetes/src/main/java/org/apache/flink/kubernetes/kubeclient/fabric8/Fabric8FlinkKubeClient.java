@@ -98,7 +98,8 @@ public class Fabric8FlinkKubeClient implements KubeClient {
 	}
 
 	@Override
-	public void createClusterPod() {
+	public void createClusterPod(boolean sessionMode) {
+		flinkKubeOptions.setSessionMode(sessionMode);
 		FlinkPod pod = new FlinkPod(this.flinkKubeOptions);
 
 		for (Decorator<Pod, FlinkPod> d : this.clusterPodDecorators) {
@@ -259,13 +260,13 @@ public class Fabric8FlinkKubeClient implements KubeClient {
 
 	@Override
 	public void close() {
-		//clear pod without owner service
-		String ns = this.flinkKubeOptions.getNamespace() == null ? "default" : this.flinkKubeOptions.getNamespace();
-		this.internalClient.pods().inNamespace(ns).withLabelIn("app", "flink-native-k8s").list().getItems().forEach(p -> {
-			String ownerName = p.getMetadata().getOwnerReferences().get(0).getName();
-			if (this.internalClient.services().inNamespace(ns).withName(ownerName).fromServer().get() == null) {
-				this.internalClient.pods().delete(p);
-			}
-		});
+		//clear pods without owner service
+		String nameSpace = this.flinkKubeOptions.getNamespace();
+		String clusterId = this.flinkKubeOptions.getClusterId();
+
+		if (this.internalClient.services().inNamespace(nameSpace).withLabelIn("appId", clusterId).list().getItems().size() == 0) {
+			this.internalClient.pods().inNamespace(nameSpace).withLabelIn("appId", clusterId).delete();
+		}
+
 	}
 }

@@ -70,7 +70,7 @@ public class Fabric8ClientTest {
 	public void testCreateClusterPod() {
 		FlinkKubernetesOptions options = new FlinkKubernetesOptions(new Configuration(), "abc");
 		Fabric8FlinkKubeClient flinkKubeClient = this.getClient(options);
-		flinkKubeClient.createClusterPod();
+		flinkKubeClient.createClusterPod(true);
 
 		KubernetesClient client = server.getClient();
 		PodList list = client.pods().list();

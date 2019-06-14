@@ -46,13 +46,16 @@ public class JobManagerPodDecorator extends Decorator<Pod, FlinkPod> {
 
 		Map<String, String> labels = LabelBuilder
 			.withExist(resource.getMetadata().getLabels())
+			.withClusterId(flinkKubernetesOptions.getClusterId())
 			.withJobManagerRole()
 			.toLabels();
 
 		resource.getMetadata().setLabels(labels);
 
+		String mode = flinkKubernetesOptions.isSessionMode() ? "cluster" : "job";
+
 		List<String> args = Arrays.asList(
-			"cluster",
+			mode,
 			"-" + FlinkKubernetesOptions.IMAGE_OPTION.getLongOpt(),
 			flinkKubernetesOptions.getImageName(),
 			"-" + FlinkKubernetesOptions.CLUSTERID_OPTION.getLongOpt(),

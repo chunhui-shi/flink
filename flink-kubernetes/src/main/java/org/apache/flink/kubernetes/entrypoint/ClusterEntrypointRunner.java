@@ -18,6 +18,8 @@
 
 package org.apache.flink.kubernetes.entrypoint;
 
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.Options;
 import org.apache.flink.kubernetes.FlinkKubernetesOptions;
 import org.apache.flink.runtime.entrypoint.ClusterEntrypoint;
 import org.apache.flink.runtime.entrypoint.FlinkParseException;
@@ -30,6 +32,14 @@ import org.apache.flink.runtime.util.SignalHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nonnull;
+
+import static org.apache.flink.kubernetes.FlinkKubernetesOptions.CLUSTERID_OPTION;
+import static org.apache.flink.kubernetes.FlinkKubernetesOptions.IMAGE_OPTION;
+import static org.apache.flink.runtime.entrypoint.parser.CommandLineOptions.DYNAMIC_PROPERTY_OPTION;
+import static org.apache.flink.runtime.entrypoint.parser.CommandLineOptions.HOST_OPTION;
+import static org.apache.flink.runtime.entrypoint.parser.CommandLineOptions.REST_PORT_OPTION;
+
 /**
  * Base class for the run {@link ClusterEntrypoint}.
  * */
@@ -37,6 +47,23 @@ public abstract class ClusterEntrypointRunner implements ParserResultFactory<Fli
 	protected static final Logger LOG = LoggerFactory.getLogger(ClusterEntrypointRunner.class);
 
 	protected abstract ClusterEntrypoint createClusterEntrypoint(FlinkKubernetesOptions options);
+
+
+	@Override
+	public Options getOptions() {
+		final Options options = new Options();
+		options.addOption(REST_PORT_OPTION);
+		options.addOption(HOST_OPTION);
+		options.addOption(DYNAMIC_PROPERTY_OPTION);
+		options.addOption(IMAGE_OPTION);
+		options.addOption(CLUSTERID_OPTION);
+		return options;
+	}
+
+	@Override
+	public FlinkKubernetesOptions createResult(@Nonnull CommandLine commandLine) {
+		return FlinkKubernetesOptions.fromCommandLine(commandLine);
+	}
 
 	public void run(String[] args) {
 

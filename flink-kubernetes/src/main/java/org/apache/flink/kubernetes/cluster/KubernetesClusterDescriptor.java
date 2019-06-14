@@ -23,6 +23,7 @@ import org.apache.flink.client.deployment.ClusterDescriptor;
 import org.apache.flink.client.deployment.ClusterRetrieveException;
 import org.apache.flink.client.deployment.ClusterSpecification;
 import org.apache.flink.client.program.ClusterClient;
+import org.apache.flink.client.program.ProgramInvocationException;
 import org.apache.flink.client.program.rest.RestClusterClient;
 import org.apache.flink.configuration.ConfigOption;
 import org.apache.flink.configuration.Configuration;
@@ -124,22 +125,31 @@ public class KubernetesClusterDescriptor implements ClusterDescriptor<String> {
 
 		String clusterId = this.generateClusterId();
 
-		//TODO: add arguments
-		final List<String> args = Arrays.asList();
-
-		return this.deployClusterInternal(clusterId, args);
+		return this.deployClusterInternal(clusterId, true);
 	}
 
 	@Override
-	public ClusterClient<String> deployJobCluster(ClusterSpecification clusterSpecification, JobGraph jobGraph, boolean detached) {
-		throw new NotImplementedException();
+	public ClusterClient<String> deployJobCluster(ClusterSpecification clusterSpecification, JobGraph jobGraph, boolean detached)
+		throws ClusterDeploymentException {
+
+		this.options.setDetached(detached);
+		String clusterId = this.generateClusterId();
+
+		ClusterClient clusterClient = this.deployClusterInternal(clusterId, false);
+		clusterClient.setDetached(detached);
+		try {
+			clusterClient.submitJob(jobGraph, KubernetesClusterDescriptor.class.getClassLoader());
+		} catch (ProgramInvocationException e) {
+			e.printStackTrace();
+		}
+		return clusterClient;
 	}
 
 	@Nonnull
-	private ClusterClient<String> deployClusterInternal(String clusterId, List<String> args) throws ClusterDeploymentException {
+	private ClusterClient<String> deployClusterInternal(String clusterId, boolean sessionMode) throws ClusterDeploymentException {
 		try {
 			FlinkService clusterService = this.client.createClusterService(clusterId).get();
-			this.client.createClusterPod();
+			this.client.createClusterPod(sessionMode);
 			return this.createClusterClient(clusterService, clusterId);
 		} catch (Exception e) {
 			this.client.logException(e);

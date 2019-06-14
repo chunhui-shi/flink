@@ -100,6 +100,26 @@ public class FlinkKubernetesOptions {
 
 	private String serviceUUID;
 
+	private boolean sessionMode;
+
+	private boolean detached;
+
+	public boolean isDetached() {
+		return detached;
+	}
+
+	public void setDetached(boolean detached) {
+		this.detached = detached;
+	}
+
+	public boolean isSessionMode() {
+		return sessionMode;
+	}
+
+	public void setSessionMode(boolean sessionMode) {
+		this.sessionMode = sessionMode;
+	}
+
 	public FlinkKubernetesOptions(Configuration configuration, String clusterId) {
 		Preconditions.checkArgument(configuration != null);
 		this.configuration = configuration;
